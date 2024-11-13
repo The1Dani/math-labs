@@ -1,17 +1,22 @@
+import xnor as x
+
 
 def main():
-    myset = []
+    # myset = []
 
-    get_set(myset)
+    # get_set(myset)
 
-    # print_set(myset)
+    # # print_set(myset)
 
-    myset = set(myset)
+    # myset = set(myset)
 
-    pset = get_subsets(myset)
+    # pset = get_subsets(myset)
     
 
-    print_set(pset)
+    # print_set(pset)
+    d = x.mfloor(12.54)
+    b = x.xnor(1, 1)
+    print(d)
 
 
 def get_subsets(input_set):
