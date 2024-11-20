@@ -1,58 +1,57 @@
-
 def main():
 
-    num = 315
-    num = get_int()
+    arr = get_arr()
 
-    nnum = next_int(num)
+    final_arr = next_arr(arr)
 
-    if num == nnum:
-        print("This number is already the smallest one")
-    else:
-        print(nnum)
+    print(final_arr)
 
-def numtoarr(num:int):
-    str_n = str(num)
-    num_arr = []
-    for i in str_n:
-        num_arr.append(int(i))
-    return num_arr
+    # if num == nnum:
+    #     print("This number is already the smallest one")
+    # else:
+    #     print(nnum)
 
 def swapinarr(arr ,a, b):
     t = arr[a]
     arr[a] = arr[b]
     arr[b] = t
 
-def get_final_int(arr):
-    arr = [str(i) for i in arr]
-    return int("".join(arr))
 
-def next_int(n):
-    arr = numtoarr(n)
+def next_arr(arr):
 
-    if sorted(arr ,reverse=True):
-        return get_final_int(arr)
-
+    # If already in descending order, no bigger number possible
 
     arr_len = len(arr)
     pivot = 0
-    for i in range(arr_len):
-        index = arr_len - i - 1
-        if i < arr_len - 1 and arr[index] < arr[index - 1] and arr[pivot] < arr[index - 1]:
-            pivot = index - 1
     
-    swapinarr(arr, pivot, pivot + 1)
-    
+    # Find rightmost pair where left digit is smaller than right digit
+    for i in range(arr_len - 1, 0, -1):
+        if arr[i] > arr[i - 1]:
+            pivot = i - 1
+            break
+
+    # Find smallest digit on right that's greater than pivot
+    smallest_greater = max(arr)
+    swap_idx = pivot
+    for i in range(pivot + 1, arr_len):
+        if arr[i] > arr[pivot] and arr[i] <= smallest_greater:
+            smallest_greater = arr[i]
+            swap_idx = i
+
+    # Swap pivot with next bigger digit
+    swapinarr(arr, pivot, swap_idx)
+
+    # Sort remaining digits in ascending order
     sorted_part = arr[pivot + 1:]
-    sorted_part.sort(reverse=True)
+    sorted_part.sort()
 
     new_arr = arr[:pivot + 1] + sorted_part
 
-    return get_final_int(new_arr)
+    return new_arr
 
 
-def get_int():
-    return int(input("Enter a number: "))
+def get_arr():
+    return eval(input("Enter a number arr: "))
 
 
 
