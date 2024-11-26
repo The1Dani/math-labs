@@ -6,11 +6,6 @@ def main():
 
     print(final_arr)
 
-    # if num == nnum:
-    #     print("This number is already the smallest one")
-    # else:
-    #     print(nnum)
-
 def swapinarr(arr ,a, b):
     t = arr[a]
     arr[a] = arr[b]
