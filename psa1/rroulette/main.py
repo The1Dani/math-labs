@@ -1,68 +1,159 @@
-from random import choice
+from random import randint, choice
 
-def rroulette(chamber:list):
-    return 0 if choice(chamber) == 0 else 1
 
-def calc_alive(chamber:list, reps:int):
+class Gun:
 
-    dead = 0
+    def __init__(self, chamber_size:int, load:int, sidebs=False) -> None:
+        self.chamber_size = chamber_size
+        self.chamber = [False] * chamber_size
+        self.loaded = load
 
-    for _ in range(reps):
-        dead += 1 if rroulette(chamber) == 1 else 0
+        # Load the gun
+        if not sidebs:
+            [self.load_arb() for _ in range(load)]
+            # self.rand_spin()
+        else:
+            for i in range(load if load < chamber_size else chamber_size):
+                self.chamber[i] = True
+            self.rand_spin()
 
-    avg = (1 - dead/reps)*100
-    print(f"Average wins: {avg:.2f}% ~{round(avg)}%\n")
+    def load_arb(self):
+
+        if  all(not i for i in self.chamber):
+            self.chamber[choice(range(self.chamber_size))] = True
+
+        next_bul_pos = choice(range(self.chamber_size))
+
+
+        if (next_bul_pos + 1 > self.chamber_size - 1) or (next_bul_pos - 1 < 0):
+            self.load_arb()
+        else:
+            cond = self.chamber[0] and next_bul_pos == self.chamber_size - 1 or self.chamber[self.chamber_size - 1] and next_bul_pos == 0
+                
+
+            if (self.chamber[next_bul_pos] or (self.chamber[next_bul_pos + 1] or self.chamber[next_bul_pos - 1])) and cond:
+                self.load_arb()
+                
+            else:
+                self.chamber[next_bul_pos] = True
+
+    def rand_spin(self):
+        [self.spin() for _ in range(randint(1, self.chamber_size)) ]
+
+    def spin(self):
+        #? This rotates the chamber one time meaning the last goes to the first
+        # self.chamber = self.chamber[-1:] + self.chamber[:-1]
+        # print(self.chamber[-1:], self.chamber[:-1])
+        self.chamber = self.chamber[-1:] + self.chamber[:-1]
+
+    def fire(self):
+        if self.chamber[0]:
+            self.chamber[0] = False
+            self.loaded -= 1
+            self.spin()
+            return True
+        else:
+            self.spin()
+            return False
+    
+    
+    def __str__(self) -> str:
+        return f"Gun Chamber: {list(map(int, self.chamber))}, Loaded: {self.loaded}"
+
+def experiment(chamber_size, bullets, sidebs:bool , spin:bool):
+    gun = Gun(chamber_size, bullets, sidebs)
+    if not gun.fire():
+        gun.rand_spin() if spin else None
+        if not gun.fire():
+            return True
+        else:
+            return False
+    return experiment(chamber_size, bullets, sidebs, spin)
+
 
 def main():
+    c = 0
+    r = 100_000
 
-    reps = 1_000_000
+    #! experiment(Chamber_size, Bullets, Side_by_Side, Spin)
 
-    # 6 barrel chamber with one fired and two bullets
-    chamber = [0, 0, [1, 1], 0]
-    print("6 barrel one fired two adj not spinned")
-    calc_alive(chamber, reps)
+    for _ in range(r):
+        if experiment(6, 2, True, False):
+            c += 1
+
+    print(f"6 barrel 2 adj dont spin {round(c/r * 100)}%")
     
-    #? if we spin the barrel we would return to the original state and the chamber 
-    #? before it was fired so we have to add the shot to the chamber (empty space)
+    c = 0
 
-    chamber.append(0)
-    print("6 barrel one fired two adj spinned")
-    calc_alive(chamber, reps)
+    for _ in range(r):
+        if experiment(6, 2, True, True):
+            c += 1
+    
+    print(f"6 barrel 2 adj do spin {round(c/r * 100)}%")
+    
+    print()    
 
+    c = 0
 
-    #? If the bullets are not adjecent to each other and the first shot did not kill us
-    chamber = [0, 1, 0, 1, 0]
-    print("6 barrel one fired two not adj not spinned")
-    calc_alive(chamber, reps)
+    for _ in range(r):
+        if experiment(6, 2, False, False):
+            c += 1
+    
+    print(f"6 barrel 2 not sbs dont spin {round(c/r * 100)}%")
 
-    #? If the bullets are not adjecent and we spin the barrel
-    chamber.append(0)
-    print("6 barrel one fired two not adj spinned")
-    calc_alive(chamber, reps)
+    c = 0
 
-    ################## 5 barrel scenarios
+    for _ in range(r):
+        if experiment(6, 2, False, True):
+            c += 1
 
-    #? 5 barrel chamber with one fired and two bullets adjacent
-    chamber = [0, 0, [1, 1]]
-    print("5 barrel one fired two adj not spinned")
-    calc_alive(chamber, reps)
+    print(f"6 barrel 2 not sbs do spin {round(c/r * 100)}%")
 
-    #? 5 barrel chamber with one fired and spinned
-    chamber.append(0)
-    print("5 barrel one fired two adj spinned")
-    calc_alive(chamber, reps)
+    print()
 
-    #? 5 barrel chamber with one fired and two bullets not adjacent
-    chamber = [0, 1, 0, 1]
-    print("5 barrel one fired two not adj not spinned")
-    calc_alive(chamber, reps)
+    c = 0
 
-    #? 5 barrel chamber with one fired and spinned
-    chamber.append(0)
-    print("5 barrel one fired two not adj spinned")
-    calc_alive(chamber, reps)
+    for _ in range(r):
+        if experiment(5, 2, True, False):
+            c += 1
+    
+    print(f"5 barrel 2 adj dont spin {round(c/r * 100)}%")
+
+    c = 0
+
+    for _ in range(r):
+        if experiment(5, 2, True, True):
+            c += 1
+    
+    print(f"5 barrel 2 adj do spin {round(c/r * 100)}%")
+
+    print()
+
+    c = 0
+
+    for _ in range(r):
+        if experiment(5, 2, False, False):
+            c += 1
+        
+    print(f"5 barrel 2 not sbs dont spin {round(c/r * 100)}%")
+
+    c = 0
+
+    for _ in range(r):
+        if experiment(5, 2, False, True):
+            c += 1
+    
+    print(f"5 barrel 2 not sbs do spin {round(c/r * 100)}%")
+
+    print()
+
 
 
 if __name__ == "__main__":
+    
+    # for _ in range(10):
+    #     gun = Gun(6, 2)
+    #     print(gun)
+    
     main()
     
